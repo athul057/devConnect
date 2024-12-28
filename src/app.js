@@ -50,13 +50,14 @@ app.post("/login", async (req, res) => {
   if (!user) {
    throw new Error("User is not registerd.")
   }
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  // const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await user.passwordValidation(password)
   if (!isPasswordValid) {
    res.status(401).send("Invalid password.");
   }
   else {
-   const token = await jwt.sign({ _id: user._id }, "athul")
-   console.log(token);
+   const token = await user.jwtValidation();
+
    res.cookie("token", token)
 
    res.send("Logged in.")
@@ -64,7 +65,7 @@ app.post("/login", async (req, res) => {
 
 
  } catch (error) {
-  res.status(404).send("ERROR: ", error.message)
+  res.status(500).send("ERROR: " + error.message)
  }
 
 })
