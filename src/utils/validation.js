@@ -1,5 +1,5 @@
 const validator = require("validator")
-
+const User = require("../models/user");
 
 const validateUserSignUp = (req) => {
  const { firstName, lastName, emailId, password } = req.body;
@@ -17,4 +17,19 @@ const validateUserSignUp = (req) => {
  }
 }
 
-module.exports = { validateUserSignUp }
+
+
+const validateEditProfileData = (req) => {
+ const allowedEdit = ["firstName", "gender", "about", "age", "bio", "photoUrl", "lastName"];
+
+ const data = req.body;
+ console.log(data);
+
+ // Check if every key in `data` is allowed
+ const isEditAllowed = Object.keys(data).every((k) => allowedEdit.includes(k));
+ console.log(isEditAllowed);
+ return isEditAllowed;
+};
+
+
+module.exports = { validateUserSignUp, validateEditProfileData }
