@@ -9,7 +9,8 @@ const UserSchema = new mongoose.Schema({
   type: String,
   required: true,
   minLength: 4,
-  maxLength: 50
+  maxLength: 50,
+  index: true
 
  },
  lastName: {
@@ -21,6 +22,7 @@ const UserSchema = new mongoose.Schema({
   unique: true,
   lowercase: true,
   trim: true,
+  index: true,
   validate(value) {
    if (!validator.isEmail(value)) {
     throw new Error("It is not a correct email form.")
@@ -80,5 +82,7 @@ UserSchema.methods.jwtValidation = async function () {
 }
 
 const userModel = mongoose.model("User", UserSchema)
+
+
 
 module.exports = userModel;

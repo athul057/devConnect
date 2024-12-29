@@ -8,6 +8,7 @@ const requestRouter = require("./routes/request")
 
 const cookieParser = require("cookie-parser")
 const jwt = require('jsonwebtoken');
+const userRouter = require("./routes/user");
 
 
 //This midddleware will convert from json to js object and add into the req.body.So we will get req.body in the form of javascript object...
@@ -19,6 +20,7 @@ app.use(cookieParser())
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
+app.use("/", userRouter);
 
 
 
