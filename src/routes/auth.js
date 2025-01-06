@@ -23,8 +23,16 @@ authRouter.post("/signup", async (req, res) => {
   const user = new User({
    firstName, lastName, password: encryptedPassword, emailId
   });
-  await user.save();
-  res.send("user created..")
+  const newUser = await user.save();
+  //logging the new use user....
+
+  const token = await newUser.jwtValidation();
+
+  res.cookie("token", token)
+  res.json({
+   message: "user created",
+   data: newUser
+  })
  } catch (error) {
   res.status(404).send("ERROR: " + error.message)
  }
@@ -45,14 +53,17 @@ authRouter.post("/login", async (req, res) => {
   // const isPasswordValid = await bcrypt.compare(password, user.password);
   const isPasswordValid = await user.passwordValidation(password)
   if (!isPasswordValid) {
-   res.status(401).send("Invalid password.");
+   res.status(401).send("Invalid credentilas..");
   }
   else {
    const token = await user.jwtValidation();
 
    res.cookie("token", token)
 
-   res.send("Logged in.")
+   res.json({
+    message: "Logged In",
+    user
+   })
   }
 
 
@@ -63,6 +74,7 @@ authRouter.post("/login", async (req, res) => {
 })
 
 authRouter.post("/logout", async (req, res) => {
+
  await res.cookie("token", null, { expires: new Date(Date.now()) })
  res.send("Logged out...")
 })

@@ -11,7 +11,7 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   const logInUser = req.user;
   const connectionRequests = await connectionRequest.find({
    toUserId: logInUser._id, status: "intrested"
-  }).populate("fromUserId", "firstName lastName imageUrl age")
+  }).populate("fromUserId", "firstName lastName imageUrl age photoUrl about")
   // }).populate("fromUserId", ["firstName", "lastName"])
   res.json({
    message: "Data fetched successfully",
@@ -30,7 +30,7 @@ userRouter.get("/user/requests/connections", userAuth, async (req, res) => {
  try {
   const loginUser = req.user;
   const connectionRequests = await connectionRequest.find({ $or: [{ fromUserId: loginUser._id, status: "accepted" }, { toUserId: loginUser._id, status: "accepted" }] })
-   .populate("fromUserId", ["firstName", "lastName"]).populate("toUserId", ["firstName", "lastName"])
+   .populate("fromUserId", ["firstName", "lastName", "photoUrl", "age", "gender", "about"]).populate("toUserId", ["firstName", "lastName", "age", "gender", "photoUrl", "about"])
   const filteredData = connectionRequests.map((connectionRequest) => {
 
 
@@ -63,26 +63,32 @@ userRouter.get("/feed", userAuth, async (req, res) => {
   const logInUser = req.user;
   const connectedUsers = await connectionRequest.find({
    $or: [{ fromUserId: logInUser._id }, { toUserId: logInUser._id }]
-  }).select("fromUserId toUserId").lean()
+  }).select("fromUserId toUserId")
+  // console.log(connectedUsers)
+  // const connectedUsers = await connectionRequest.find({
+  //  $or: [{ fromUserId: logInUser._id }, { toUserId: logInUser._id }]
+  // }).select("fromUserId toUserId").lean()
   const hideUserId = new Set()
   connectedUsers.forEach((user) => {
    hideUserId.add(user.fromUserId.toString());
    hideUserId.add(user.toUserId.toString());
 
   })
-
-  const feedUsers = await Users.find({
-   $and: [{ _id: { $nin: Array.from(hideUserId) } }, { _id: { $ne: logInUser._id } }]
-  }).select("firstName lastName about photoUrl")
-   .skip(skip)
-   .limit(limit)
-  //....................OR.............................
+  console.log(hideUserId)
   // const feedUsers = await Users.find({
-  //  _id: {
-  //   $nin: [...Array.from(hideUserId), logInUser._id]
-  //  }
-  // })
+  //  $and: [{ _id: { $nin: Array.from(hideUserId) } }, { _id: { $ne: logInUser._id } }]
+  // }).select("firstName lastName about photoUrl")
+  //  .skip(skip)
+  //  .limit(limit)
+
+  //....................OR.............................
+  const feedUsers = await Users.find({
+   _id: {
+    $nin: [...Array.from(hideUserId), logInUser._id]
+   }
+  })
   //....................................................
+  console.log(feedUsers);
   res.json({
    message: "user fetched successfully",
    data: feedUsers
